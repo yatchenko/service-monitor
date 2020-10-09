@@ -1,0 +1,9 @@
+[Unit]
+Description=Service timeout monitor
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/service-monitor.py
+
+[Install]
+WantedBy=basic.target
