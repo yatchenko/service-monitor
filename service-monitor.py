@@ -5,8 +5,7 @@ import os
 from time import sleep, time
 import sys
 
-service_configs = {
-    ## sevicename: timeout
+service_timeouts = {
     'hmi-mainfu'            : 5,
     'hmi-phonefu'           : 5,
     'hmi-displaysettingsfu' : 5,
@@ -18,9 +17,12 @@ class Service:
         self.timeout=timeout
         self.activating_time = None
         self.coredumped = False
-    
+
+    def prop(self, prop):
+        return os.popen('systemctl --no-pager show {} --property {} --value'.format(self.servicename, prop)).read().rstrip()
+
     def check(self):
-        state = os.popen('systemctl is-active '+self.servicename).read().rstrip()
+        state = self.prop('ActiveState')
         if not self.activating_time and state == 'activating':
             print('Activating service {}'.format(self.servicename))
             self.activating_time = time()
@@ -31,20 +33,16 @@ class Service:
             self.coredumped = True
             self.dump()
 
-    def pid(self):
-        return os.popen('systemctl --no-pager show --property MainPID --value {}'.format(self.servicename)).read().rstrip()        
-    
     def dump(self):
         print('Initiating {} coredump'.format(self.servicename))
-        os.system('touch /apps_data/dlt-core/{}.{}.gz.timeout'.format(self.servicename, self.pid()))
+        os.system('touch /apps_data/dlt-core/{}.{}.gz.timeout'.format(self.servicename, self.prop('MainPID')))
         os.system('systemctl kill -s SIGSEGV --kill-who=main {}'.format(self.servicename))
 
 
-services = [Service(s, t) for s, t in service_configs.items()]
+services = [Service(s, t) for s, t in service_timeouts.items()]
 
 while True:
     for s in services:
         s.check()
     sys.stdout.flush()
     sleep(.5)
-        
