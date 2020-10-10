@@ -16,9 +16,9 @@ class Service:
     def __init__(self, name, timeout):
         self.name=name
         self.timeout=timeout
-        self.uninit()
+        self.set_inactive()
 
-    def uninit(self):
+    def set_inactive(self):
         self.activating_time = None
         self.coredumped = False
         self.mainpid = None
@@ -38,7 +38,7 @@ class Service:
             self.activating_time = None
         elif state == 'inactive' and self.coredumped:
             print('Service {} is inactive'.format(self.name))
-            self.uninit()
+            self.set_inactive()
 
         if state == 'activating' and (curtime - self.activating_time > self.timeout) and not self.coredumped:
             self.coredumped = True
