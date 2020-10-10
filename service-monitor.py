@@ -23,14 +23,12 @@ class Service:
         self.coredumped = False
         self.mainpid = None
 
-
     def prop(self, propname):
         return os.popen('systemctl --no-pager show {} --property {} --value'.format(self.name, propname)).read().rstrip()
 
     def check(self):
         state = self.prop('ActiveState')
         curtime = time()
-
         if (self.activating_time is None) and state == 'activating':
             print('Activating service {}'.format(self.name))
             self.activating_time = curtime
