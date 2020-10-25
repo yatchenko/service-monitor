@@ -9,6 +9,21 @@ service_configs = [
     #('hmi-phonefu.service' ,  4.9, ['pas-daemon.service']),
 ]
 
+class Unbuffered(object):
+   def __init__(self, stream):
+       self.stream = stream
+   def write(self, data):
+       self.stream.write(data)
+       self.stream.flush()
+   def writelines(self, datas):
+       self.stream.writelines(datas)
+       self.stream.flush()
+   def __getattr__(self, attr):
+       return getattr(self.stream, attr)
+
+import sys
+sys.stdout = Unbuffered(sys.stdout)
+
 ## Monotonic time
 CLOCK_MONOTONIC_RAW = 4 # see <linux/time.h>
 
