@@ -2,8 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import unbuffered
-import os
-import re
+import os, re
 from collections import namedtuple
 
 FU = namedtuple('FU',['fuclass','fuid','fil'])
@@ -44,7 +43,9 @@ def check_fu_connected():
     fils = set()
     for i in FUs.keys():
         if i not in connected:
+            print("fuclass {} is not connected to hmi (fil:{})".format(FUs[i].fuclass, FUs[i].fil))
             fils.add(FUs[i].fil)
 
     for fil in fils:
+        print("Initiating core dump service HMI-{}FU".format(fil))
         os.system('killall -s SIGSEGV HMI-{}FU'.format(fil))
