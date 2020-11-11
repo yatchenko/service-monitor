@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import unbuffered
-import os, re
+import os, re, sys
 from collections import namedtuple
 
 FU = namedtuple('FU',['fuclass','fuid','fil'])
@@ -30,12 +29,12 @@ FUs = {
     20: FU("VehicleVariant"  , 248, "VehicleData"     ),
 }
 
-ConnectedCommand = 'dlt-receive -a localhost|grep -e "fu::Lifecycle::doNotifyFUConnectedAction(U32) FU:"'
-ConnectedRegex = r".*fu::Lifecycle::doNotifyFUConnectedAction(U32) FU: (\d+).*"
+ConnectedCommand = 'dlt-convert -a {}|grep -e "fu::Lifecycle::doNotifyFUConnectedAction(U32) FU:"'
+ConnectedRegex = r'.*fu::Lifecycle::doNotifyFUConnectedAction\(U32\) FU: (\d+).*'
 
-def check_fu_connected():
+def check_fu_connected(dlt):
     connected = set()
-    for s in os.popen(ConnectedCommand):
+    for s in os.popen(ConnectedCommand.format(dlt)):
         m = re.match(ConnectedRegex, s.rstrip())
         if m:
              connected.add(int(m.group(1)))
@@ -49,3 +48,9 @@ def check_fu_connected():
     for fil in fils:
         print("Initiating core dump service HMI-{}FU".format(fil))
         os.system('killall -s SIGSEGV HMI-{}FU'.format(fil))
+
+if __name__ == "__main__":
+    if len(sys.argv) > 1:
+        check_fu_connected(sys.argv[1])
+    else:
+        print("Syntax:\n> hmi-check dlt-file")

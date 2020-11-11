@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+#env - PYTHONUNBUFFERED=on python service-monitor.py
+
 import os
 from time import sleep
-import unbuffered
 from monotonic import monotonic
 
 service_configs = [
